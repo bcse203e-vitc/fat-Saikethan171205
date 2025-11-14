@@ -1,0 +1,35 @@
+<html>
+    <body>
+        <label>Enter the No.of Kiloliters needed:</label><br>
+        <input type="text" id="usage"><br><br>
+        <button onclick="processBill()">Submit</button>
+        <p id="current"></p>
+        <p id="total"></p>
+        <script>
+            let runningTotal = 0;
+            function calculateBill(usage) {
+                let charge = 50;
+                if (usage <= 15) {
+                    charge += usage * 2;
+                } else if (usage <= 35) {
+                    charge += 15 * 2 + (usage - 15) * 5;
+                } else {
+                    charge += 15 * 2 + 20 * 5 + (usage - 35) * 10;
+                }
+                return charge;
+            }
+            function processBill() {
+                let input = document.getElementById("usage").value;
+                if (isNaN(input) || input < 0 || input === "") {
+                    alert("Enter a valid non-negative number");
+                    return;
+                }
+                let usage = Number(input);
+                let bill = calculateBill(usage);
+                runningTotal += bill;
+                document.getElementById("current").innerHTML = "Current Bill: ₹" + bill;
+                document.getElementById("total").innerHTML = "Running Total: ₹" + runningTotal;
+            }
+        </script>
+    </body>
+</html>

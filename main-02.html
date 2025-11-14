@@ -1,0 +1,66 @@
+<html>
+    <body>
+        <input type="file" id="fileInput"><br><br><br>
+        <select id="mode">
+            <option value="compress">compress</option>
+            <option value="expand">expand</option>
+        </select>
+        <button onclick="processFile()">Normalize</button>
+        <p id="output"></p>
+        <script>
+        function normalizeText(content, mode) {
+            let lines = content.split("\n");
+            let corrected = [];
+            let corrections = 0;
+            let blankBefore = false;
+            lines.forEach(line => {
+                let original = line;
+                line = line.replace(/[\t ]+/g, " ");
+                if (line !== original) corrections++;
+                original = line;
+                line = line.trim();
+                if (line !== original) corrections++;
+                if (/^[\p{P}]+$/u.test(line)) {
+                    document.getElementById("output").innerHTML += "Punctuation-only line: " + line + "<br>";
+                }
+                if (mode === "compress") {
+                    if (line === "") {
+                        if (!blankBefore) {
+                            corrected.push("");
+                            blankBefore = true;
+                        }
+                        return;
+                    }
+                    blankBefore = false;
+                }
+                corrected.push(line);
+            });
+            if (mode === "expand") {
+                let exp = [];
+                corrected.forEach((l, i) => {
+                    exp.push(l);
+                    if (i < corrected.length - 1) exp.push("");
+                });
+                corrected = exp;
+            }
+            return { text: corrected.join("\n"), count: corrections };
+        }
+        function processFile() {
+            let file = document.getElementById("fileInput").files[0];
+            let mode = document.getElementById("mode").value;
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById("output").innerHTML = "";
+                let result = normalizeText(e.target.result, mode);
+                let blob = new Blob([result.text], { type: "text/plain" });
+                let link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = file.name;
+                link.click();
+                document.getElementById("output").innerHTML += "Corrections: " + result.count;
+            }
+            reader.readAsText(file);
+        }
+        </script>
+    </body>
+</html>
